@@ -1,0 +1,197 @@
+; Computes D = AB + beta C
+OpCapability Shader
+OpCapability Float16
+OpCapability Int64
+OpCapability PhysicalStorageBufferAddresses
+OpCapability VulkanMemoryModel
+
+OpMemoryModel PhysicalStorageBuffer64 Vulkan
+OpEntryPoint GLCompute `main_f` "main" `gid_p` `lid_p` `pc_p` `wgMatA32x32_p` `wgMatB32x32_p`
+OpExecutionMode `main_f` LocalSize 32 32 1
+
+; Annotation
+OpDecorate `spSize`     SpecId 0
+OpDecorate `spLog2Size` SpecId 1
+
+OpDecorate `gid_p` BuiltIn GlobalInvocationId
+OpDecorate `lid_p` BuiltIn LocalInvocationId
+
+OpDecorate `pt_f16_t` ArrayStride 2
+OpDecorate `f16spArrLen_t` ArrayStride 2   ; sizeof(f16_t)
+
+OpDecorate `u64_u64_u64_u64_f32_f32_t` Block
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 0 Offset 0  ; CBase
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 1 Offset 8  ; BBase
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 2 Offset 16 ; ABase
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 3 Offset 24 ; DBase
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 4 Offset 32 ; alpha
+OpMemberDecorate `u64_u64_u64_u64_f32_f32_t` 5 Offset 36 ; beta
+
+; Variable Type
+void                         = OpTypeVoid
+bool                         = OpTypeBool
+i32_t                        = OpTypeInt 32 1
+u32_t                        = OpTypeInt 32 0
+u64_t                        = OpTypeInt 64 0
+f16_t                        = OpTypeFloat 16
+f32_t                        = OpTypeFloat 32
+; Constant
+`0i`                           = OpConstant i32_t 0
+`1i`                           = OpConstant i32_t 1
+`5i`                           = OpConstant i32_t 5
+`31i`                          = OpConstant i32_t 31
+`32i`                          = OpConstant i32_t 32
+`1024i`                        = OpConstant i32_t 1024
+`0.0f`                         = OpConstant f32_t 0.0
+`spSize`                       = OpSpecConstant i32_t 32
+`spLog2Size`                   = OpSpecConstant i32_t 5
+`spSize - 32`                  = OpSpecConstantOp i32_t ISub `spSize` `32i`
+`spArrLen`                     = OpSpecConstantOp i32_t IMul `spSize` `spSize`
+`Workgroup`                    = OpConstant i32_t 2
+`WorkgroupAquireRelease`       = OpConstant i32_t 0x108
+; Aggregate Type
+`v3u32_t`                      = OpTypeVector u32_t 3
+`f16spArrLen_t`                = OpTypeArray f16_t `spArrLen`
+`f1632_t`                      = OpTypeArray f16_t `32i`
+`f1632x32_t`                   = OpTypeArray f16_t `1024i`
+`u64_u64_u64_u64_f32_f32_t`    = OpTypeStruct u64_t u64_t u64_t u64_t f32_t f32_t
+; Function Type
+`void_ft`                      = OpTypeFunction `void`
+`f32_f32_u32_u32_ft`           = OpTypeFunction `f32_t` `f32_t` `u32_t` `u32_t`
+; Type Pointer
+`in_u32_t`                     = OpTypePointer Input `u32_t`
+`in_v3u32_t`                   = OpTypePointer Input `v3u32_t`
+`pc_u64_t`                     = OpTypePointer PushConstant `u64_t`
+`pc_f32_t`                     = OpTypePointer PushConstant `f32_t`
+`pc_u64_u64_u64_u64_f32_f32_t` = OpTypePointer PushConstant `u64_u64_u64_u64_f32_f32_t`
+`wg_f16_t`                     = OpTypePointer Workgroup `f16_t`
+`wg_f1632x32_t`                = OpTypePointer Workgroup `f1632x32_t`
+`pt_f16_t`                     = OpTypePointer PhysicalStorageBuffer `f16_t`
+`pt_f16spArrLen_t`             = OpTypePointer PhysicalStorageBuffer `f16spArrLen_t`
+
+; Variable
+`gid_p`         = OpVariable `in_v3u32_t` Input
+`lid_p`         = OpVariable `in_v3u32_t` Input
+`pc_p`          = OpVariable `pc_u64_u64_u64_u64_f32_f32_t` PushConstant
+`wgMatA32x32_p` = OpVariable `wg_f1632x32_t` Workgroup
+`wgMatB32x32_p` = OpVariable `wg_f1632x32_t` Workgroup
+
+; ====================================================
+; f32_t wgMMA1x1f16f32(f32_t base, u32_t lx, u32_t ly)
+; ====================================================
+`wgMMA1x1f16f32_f` = OpFunction f32_t Const|Inline f32_f32_u32_u32_ft
+`base`    = OpFunctionParameter f32_t
+`lx`      = OpFunctionParameter u32_t
+`ly * 32` = OpFunctionParameter u32_t
+
+    `l` = OpLabel
+    OpBranch `LpHd`
+
+    `LpHd` = OpLabel
+    `entrySum`           = OpPhi f32_t `base` `l` `entrySumNext` `LpCt`
+    `i`                  = OpPhi i32_t `31i` `l` `i - 1` `LpCt`
+    `i < 0`              = OpSLessThan bool `i` `0i`
+    OpLoopMerge `LpEx` `LpCt` Unroll
+    OpBranchConditional `i < 0` `LpEx` `LpBd`
+
+    `LpBd` = OpLabel
+    `ly * 32 + i`         = OpIAdd u32_t `ly * 32` `i`
+    `&wgMatA32x32[ly][i]` = OpAccessChain wg_f16_t `wgMatA32x32_p` `lyMul32_add_i`
+    `wgMatA32x32[ly][i]`  = OpLoad f16_t `&wgMatA32x32[ly][i]`
+    `i * 32`              = OpShiftLeftLogical i32_t `i` `5i`
+    `i * 32 + lx`         = OpIAdd u32_t `i * 32` `lx`
+    `&wgMatB32x32[i][lx]` = OpAccessChain wg_f16_t `wgMatB32x32_p` `i * 32 + lx`
+    `wgMatB32x32[i][lx]`  = OpLoad f16_t `&wgMatB32x32[i][lx]`
+    `componentProd`       = OpFMul f16_t `wgMatA32x32[ly][i]` `wgMatB32x32[i][lx]`
+    OpBranch `LpCt`
+
+    `LpCt` = OpLabel
+    ; f32 accumulation
+    `componentProd_f32`   = OpFConvert f32_t `componentProd`
+    `entrySumNext`        = OpFAdd f32_t `entrySum` `componentProd_f32`
+    `i - 1`              = OpISub i32_t `i` `1i`
+    OpBranch `LpHd`
+
+    `LpEx` = OpLabel
+    OpReturnValue `entrySum`
+
+OpFunctionEnd
+
+; ===========
+; void main()
+; ===========
+`main_f` = OpFunction void None void_ft
+
+    `l` = OpLabel
+    ; Get gx, gy, lx and ly builtins
+    `gid`                       = OpLoad v3u32_t `gid_p`
+    `lid`                       = OpLoad v3u32_t `lid_p`
+    `gx`                        = OpCompositeExtract u32_t `gid` 0
+    `gy`                        = OpCompositeExtract u32_t `gid` 1
+    `lx`                        = OpCompositeExtract u32_t `lid` 0
+    `ly`                        = OpCompositeExtract u32_t `lid` 1
+    ; Extract push constant
+    `pc`                        = OpLoad u64_u64_u64_u64_f32_f32_t `pc_p`
+    `matC_ull`                  = OpCompositeExtract u64_t `pc` 0
+    `matB_ull`                  = OpCompositeExtract u64_t `pc` 1
+    `matA_ull`                  = OpCompositeExtract u64_t `pc` 2
+    `matD_ull`                  = OpCompositeExtract u64_t `pc` 3
+    `alpha`                     = OpCompositeExtract f32_t `pc` 4
+    `beta`                      = OpCompositeExtract f32_t `pc` 5
+    `matC_p`                    = OpConvertUToPtr pt_f16spArrLen_t `matC_ull`
+    `matB_p`                    = OpConvertUToPtr pt_f16spArrLen_t `matB_ull`
+    `matA_p`                    = OpConvertUToPtr pt_f16spArrLen_t `matA_ull`
+    `matD_p`                    = OpConvertUToPtr pt_f16spArrLen_t `matD_ull`
+    ; Compute indices
+    `gy * spSize`               = OpShiftLeftLogical u32_t `gy` `spLog2Size` ; [gy][0]  -> whole matrix
+    `gy * spSize * gx`          = OpIAdd u32_t `gy * spSize` `gx`            ; [gy][gx] -> whole matrix
+    `ly * 32`                   = OpShiftLeftLogical u32_t `ly` `5i`         ; [ly][0]  -> 32x32 block
+    `ly * 32 + lx`              = OpIAdd u32_t `ly * 32` `lx`                ; [ly][lx] -> 32x32 block
+    ; Multiply each entry of C by beta
+    `&matC[gy][gx]`             = OpAccessChain pt_f16_t `matC_p` `gy * spSize + gx`
+    `matC[gy][gx]`              = OpLoad f16_t `&matC[gy][gx]` Aligned 2
+    `matC[gy][gx]_f32`          = OpFConvert f32_t `matC[gy][gx]`
+    `matC[gy][gx] * beta`       = OpFMul f32_t `matC[gy][gx]_f32` `beta`
+    OpBranch `LpHd`
+
+    `LpHd` = OpLabel
+    `entrySum`                  = OpPhi f32_t `matC[gy][gx] * beta` `l` `entrySumNext` `LpCt`
+    `i`                         = OpPhi i32_t `spSize - 32` `l` `i - 32` `LpCt`
+    `i < 0`                     = OpSLessThan bool `i `0i`
+    OpLoopMerge `LpEx` `LpCt` Unroll
+    OpBranchConditional `i < 0` `LpEx` `LpBd`
+
+    `LpBd` = OpLabel
+    ; Compute indices into 32x32 blocks
+    `lx + i`                    = OpIAdd u32_t `lx` `i`
+    `ly + i`                    = OpIAdd u32_t `ly` `i`
+    `gy * spSize + lx + i`      = OpIAdd u32_t `gy * spSize` `lx + i`
+    `(ly + i) * spSize`         = OpShiftLeftLogical u32_t `ly + i` `spLog2Size`
+    `(ly + i) * spSize + gx`    = OpIAdd u32_t `(ly + i) * spSize` `gx`
+    ; Tile matA column-block wise
+    `&matA[gy][lx + i]`         = OpAccessChain pt_f16_t `matA_p `gy * spSize + lx + i`
+    `matA[gy][lx + i]`          = OpLoad f16_t `&matA[gy][lx + i]` Aligned 2
+    `&wgMatA32x32[ly][lx]`      = OpAccessChain wg_f16_t `wgMatA32x32_p` `ly * 32 + lx`
+                                  OpStore `&wgMatA32x32[ly][lx]` `matA[gy][lx + i]`
+    ; Tile matB row-block wise
+    `&matB[ly + i][gx]`         = OpAccessChain pt_f16_t `matB_p` `(ly + i) * spSize + gx`
+    `matB[ly + i][gx]`          = OpLoad f16_t `&matB[ly + i][gx]` Aligned 2
+    `&wgMatB32x32[ly][lx]`      = OpAccessChain wg_f16_t `wgMatB32x32_p` `ly * 32 + lx`
+                                  OpStore `&wgMatB32x32[ly][lx]` `matB[ly + i][gx]`
+                                  OpControlBarrier `Workgroup` `Workgroup` `WorkgroupAquireRelease`
+    OpBranch `LpCt`
+
+    `LpCt` = OpLabel
+    ; Compute block matrix multiplication
+    `entrySumNext`              = OpFunctionCall f32_t `wgMMA1x1f16f32_f` `entrySum` `lx` `ly * 32`
+                                  OpControlBarrier `Workgroup` `Workgroup` `WorkgroupAquireRelease`
+    `i - 32`                    = OpISub i32_t `i` `32i`
+    OpBranch `LpHd`
+
+    `LpEx` = OpLabel
+    `entrySum_f16`              = OpFConvert f16_t `entrySum`
+    `&matD[gy][gx]`             = OpAccessChain pt_f16_t `matD_p` `gy * spSize + gx`
+                                  OpStore `&matD[gy][gx]` `entrySum_f16` Aligned 2
+    OpReturn
+
+OpFunctionEnd

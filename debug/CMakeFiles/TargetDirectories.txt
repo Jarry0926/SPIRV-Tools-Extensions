@@ -1,0 +1,3 @@
+C:/My Tools/SPIRV-Tools Plugin/debug/CMakeFiles/test.dir
+C:/My Tools/SPIRV-Tools Plugin/debug/CMakeFiles/edit_cache.dir
+C:/My Tools/SPIRV-Tools Plugin/debug/CMakeFiles/rebuild_cache.dir
