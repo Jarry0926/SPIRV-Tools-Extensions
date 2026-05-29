@@ -1,0 +1,288 @@
+
+OpCapability Shader
+OpCapability Float16
+OpCapability Int64
+OpCapability PhysicalStorageBufferAddresses
+OpCapability VulkanMemoryModel
+
+OpMemoryModel PhysicalStorageBuffer64 Vulkan
+OpEntryPoint GLCompute %_003D6FE5 "main" %_078325C3 %_07DDA048 %_003F1C42 %_D42A1FB2 %_C06BF493
+OpExecutionMode %_003D6FE5 LocalSize 32 32 1
+
+OpName %_003D6FE5 "main"
+OpName %_078325C3 "gid_p"
+OpName %_07DDA048 "lid_p"
+OpName %_003F1C42 "pc_p"
+OpName %_D42A1FB2 "wgMatA32x32_p"
+OpName %_C06BF493 "wgMatB32x32_p"
+OpName %_145B4AFE "spSize"
+OpName %_3F37A0F2 "spLog2Size"
+OpName %_00000699 "0i"
+OpName %_000006BA "1i"
+OpName %_0000073E "5i"
+OpName %_0000DFAD "31i"
+OpName %_0000DFCE "32i"
+OpName %_0391DEB0 "1024i"
+OpName %_001B1C74 "0.0f"
+OpName %_A39B1870 "spSize-32"
+OpName %_6EFB43C7 "spArrLen"
+OpName %_4F6504F0 "Workgroup"
+OpName %_07E2BAD8 "WorkgroupAquireRelease"
+OpName %_0EF3526B "wgMMA1x1f16f32"
+OpName %_072488BA "base_"
+OpName %_0001DB43 "lx_"
+OpName %_0492A093 "ly*32_"
+OpName %_00000E4B "l_"
+OpName %_059DF047 "LpHd_"
+OpName %_6D6EC5C6 "entrySum_"
+OpName %_6E4E0845 "entrySumNext_"
+OpName %_059DDD12 "LpCt_"
+OpName %_00000DE8 "i_"
+OpName %_003A59E6 "i-1_"
+OpName %_003A9994 "i<0_"
+OpName %_059DE618 "LpEx_"
+OpName %_059DD6C1 "LpBd_"
+OpName %_73BC4207 "ly*32+i_"
+OpName %_28EB0586 "&wgMatA32x32[ly][i]_"
+OpName %_DB1A2320 "wgMatA32x32[ly][i]_"
+OpName %_0783F497 "i*32_"
+OpName %_02A798C6 "i*32+lx_"
+OpName %_3BD17886 "&wgMatB32x32[i][lx]_"
+OpName %_EE009620 "wgMatB32x32[i][lx]_"
+OpName %_B0448447 "componentProd_"
+OpName %_8C241E31 "componentProd_f32_"
+OpName %_0001D80A "l__"
+OpName %_078325B2 "gid__"
+OpName %_07DDA037 "lid__"
+OpName %_003A861D "gx__"
+OpName %_003A8A5E "gy__"
+OpName %_003D4402 "lx__"
+OpName %_003D4843 "ly__"
+OpName %_003F1C31 "pc__"
+OpName %_F515508F "matC_ull__"
+OpName %_A81B13CE "matB_ull__"
+OpName %_5B20D70D "matA_ull__"
+OpName %_420F8D50 "matD_ull__"
+OpName %_2EE39224 "alpha__"
+OpName %_EBFE7DBA "beta__"
+OpName %_D6617CB2 "matC_p__"
+OpName %_D64F6431 "matB_p__"
+OpName %_D63D4BB0 "matA_p__"
+OpName %_D6739533 "matD_p__"
+OpName %_46101F06 "gy*spSize__"
+OpName %_596C7D30 "gy*spSize+gx__"
+OpName %_96E6B352 "ly*32__"
+OpName %_53D6FBE1 "ly*32+lx__"
+OpName %_6B289F78 "&matC[gy][gx]__"
+OpName %_2E8E54D2 "matC[gy][gx]__"
+OpName %_C50BF1FC "matC[gy][gx]_f32__"
+OpName %_7113FE18 "matC[gy][gx]*beta__"
+OpName %_B95BF986 "LpHd__"
+OpName %_1B477EE5 "entrySum__"
+OpName %_380F1144 "entrySumNext__"
+OpName %_B9597FB1 "LpCt__"
+OpName %_0001CB47 "i__"
+OpName %_F838D159 "i-32__"
+OpName %_078DCC73 "i<0__"
+OpName %_B95AA977 "LpEx__"
+OpName %_B958AF40 "LpBd__"
+OpName %_0481FFF6 "lx+i__"
+OpName %_04941877 "ly+i__"
+OpName %_720E07C9 "gy*spSize+lx+i__"
+OpName %_4C89D290 "(ly+i)*spSize__"
+OpName %_5BB8FC7A "(ly+i)*spSize+gx__"
+OpName %_B67030EF "&matA[gy][lx+i]__"
+OpName %_EA18A4C9 "matA[gy][lx+i]__"
+OpName %_10079AE0 "&wgMatA32x32[ly][lx]__"
+OpName %_09E12530 "&matB[ly+i][gx]__"
+OpName %_3D89990A "matB[ly+i][gx]__"
+OpName %_1C3CC0C1 "&wgMatB32x32[ly][lx]__"
+OpName %_5FA0E5D1 "entrySum_f16__"
+OpName %_F08554B9 "&matD[gy][gx]__"
+
+OpDecorate %_145B4AFE     SpecId 0
+OpDecorate %_3F37A0F2 SpecId 1
+
+OpDecorate %_078325C3 BuiltIn GlobalInvocationId
+OpDecorate %_07DDA048 BuiltIn LocalInvocationId
+
+OpDecorate %pt_f16_t ArrayStride 2
+OpDecorate %f16spArrLen_t ArrayStride 2   
+
+OpDecorate %u64_u64_u64_u64_f32_f32_t Block
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 0 Offset 0  
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 1 Offset 8  
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 2 Offset 16 
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 3 Offset 24 
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 4 Offset 32 
+OpMemberDecorate %u64_u64_u64_u64_f32_f32_t 5 Offset 36 
+
+
+
+%void                         = OpTypeVoid
+%bool                         = OpTypeBool
+%i32_t                        = OpTypeInt 32 1
+%u32_t                        = OpTypeInt 32 0
+%u64_t                        = OpTypeInt 64 0
+%f16_t                        = OpTypeFloat 16
+%f32_t                        = OpTypeFloat 32
+
+%_00000699                           = OpConstant %i32_t 0
+%_000006BA                           = OpConstant %i32_t 1
+%_0000073E                           = OpConstant %i32_t 5
+%_0000DFAD                          = OpConstant %i32_t 31
+%_0000DFCE                          = OpConstant %i32_t 32
+%_0391DEB0                        = OpConstant %i32_t 1024
+%_001B1C74                         = OpConstant %f32_t 0.0
+%_145B4AFE                       = OpSpecConstant %i32_t 32
+%_3F37A0F2                   = OpSpecConstant %i32_t 5
+%_A39B1870                  = OpSpecConstantOp %i32_t ISub %_145B4AFE %_0000DFCE
+%_6EFB43C7                     = OpSpecConstantOp %i32_t IMul %_145B4AFE %_145B4AFE
+%_4F6504F0                    = OpConstant %i32_t 2
+%_07E2BAD8       = OpConstant %i32_t 0x108
+
+%v3u32_t                      = OpTypeVector %u32_t 3
+%f16spArrLen_t                = OpTypeArray %f16_t %_6EFB43C7
+%f1632_t                      = OpTypeArray %f16_t %_0000DFCE
+%f1632x32_t                   = OpTypeArray %f16_t %_0391DEB0
+%u64_u64_u64_u64_f32_f32_t    = OpTypeStruct %u64_t %u64_t %u64_t %u64_t %f32_t %f32_t
+
+%void_ft                      = OpTypeFunction %void
+%f32_f32_u32_u32_ft           = OpTypeFunction %f32_t %f32_t %u32_t %u32_t
+
+%in_u32_t                     = OpTypePointer Input %u32_t
+%in_v3u32_t                   = OpTypePointer Input %v3u32_t
+%pc_u64_t                     = OpTypePointer PushConstant %u64_t
+%pc_f32_t                     = OpTypePointer PushConstant %f32_t
+%pc_u64_u64_u64_u64_f32_f32_t = OpTypePointer PushConstant %u64_u64_u64_u64_f32_f32_t
+%wg_f16_t                     = OpTypePointer Workgroup %f16_t
+%wg_f1632x32_t                = OpTypePointer Workgroup %f1632x32_t
+%pt_f16_t                     = OpTypePointer PhysicalStorageBuffer %f16_t
+%pt_f16spArrLen_t             = OpTypePointer PhysicalStorageBuffer %f16spArrLen_t
+
+
+%_078325C3         = OpVariable %in_v3u32_t Input
+%_07DDA048         = OpVariable %in_v3u32_t Input
+%_003F1C42          = OpVariable %pc_u64_u64_u64_u64_f32_f32_t PushConstant
+%_D42A1FB2 = OpVariable %wg_f1632x32_t Workgroup
+%_C06BF493 = OpVariable %wg_f1632x32_t Workgroup
+
+
+
+
+%_0EF3526B = OpFunction %f32_t Const|Inline %f32_f32_u32_u32_ft
+%_072488BA    = OpFunctionParameter %f32_t
+%_0001DB43      = OpFunctionParameter %u32_t
+%_0492A093 = OpFunctionParameter %u32_t
+
+    %_00000E4B = OpLabel
+    OpBranch %_059DF047
+
+    %_059DF047 = OpLabel
+    %_6D6EC5C6           = OpPhi %f32_t %_072488BA %_00000E4B %_6E4E0845 %_059DDD12
+    %_00000DE8                  = OpPhi %i32_t %_0000DFAD %_00000E4B %_003A59E6 %_059DDD12
+    %_003A9994              = OpSLessThan %bool %_00000DE8 %_00000699
+    OpLoopMerge %_059DE618 %_059DDD12 Unroll
+    OpBranchConditional %_003A9994 %_059DE618 %_059DD6C1
+
+    %_059DD6C1 = OpLabel
+    %_73BC4207         = OpIAdd %u32_t %_0492A093 %_00000DE8
+    %_28EB0586 = OpAccessChain %wg_f16_t %_D42A1FB2 %_73BC4207
+    %_DB1A2320  = OpLoad %f16_t %_28EB0586
+    %_0783F497              = OpShiftLeftLogical %i32_t %_00000DE8 %_0000073E
+    %_02A798C6         = OpIAdd %u32_t %_0783F497 %_0001DB43
+    %_3BD17886 = OpAccessChain %wg_f16_t %_C06BF493 %_02A798C6
+    %_EE009620  = OpLoad %f16_t %_3BD17886
+    %_B0448447       = OpFMul %f16_t %_DB1A2320 %_EE009620
+    OpBranch %_059DDD12
+
+    %_059DDD12 = OpLabel
+    
+    %_8C241E31   = OpFConvert %f32_t %_B0448447
+    %_6E4E0845        = OpFAdd %f32_t %_6D6EC5C6 %_8C241E31
+    %_003A59E6               = OpISub %i32_t %_00000DE8 %_000006BA
+    OpBranch %_059DF047
+
+    %_059DE618 = OpLabel
+    OpReturnValue %_6D6EC5C6
+
+OpFunctionEnd
+
+
+
+
+%_003D6FE5 = OpFunction %void None %void_ft
+
+    %_0001D80A = OpLabel
+    
+    %_078325B2                       = OpLoad %v3u32_t %_078325C3
+    %_07DDA037                       = OpLoad %v3u32_t %_07DDA048
+    %_003A861D                        = OpCompositeExtract %u32_t %_078325B2 0
+    %_003A8A5E                        = OpCompositeExtract %u32_t %_078325B2 1
+    %_003D4402                        = OpCompositeExtract %u32_t %_07DDA037 0
+    %_003D4843                        = OpCompositeExtract %u32_t %_07DDA037 1
+    
+    %_003F1C31                        = OpLoad %u64_u64_u64_u64_f32_f32_t %_003F1C42
+    %_F515508F                  = OpCompositeExtract %u64_t %_003F1C31 0
+    %_A81B13CE                  = OpCompositeExtract %u64_t %_003F1C31 1
+    %_5B20D70D                  = OpCompositeExtract %u64_t %_003F1C31 2
+    %_420F8D50                  = OpCompositeExtract %u64_t %_003F1C31 3
+    %_2EE39224                     = OpCompositeExtract %f32_t %_003F1C31 4
+    %_EBFE7DBA                      = OpCompositeExtract %f32_t %_003F1C31 5
+    %_D6617CB2                    = OpConvertUToPtr %pt_f16spArrLen_t %_F515508F
+    %_D64F6431                    = OpConvertUToPtr %pt_f16spArrLen_t %_A81B13CE
+    %_D63D4BB0                    = OpConvertUToPtr %pt_f16spArrLen_t %_5B20D70D
+    %_D6739533                    = OpConvertUToPtr %pt_f16spArrLen_t %_420F8D50
+    
+    %_46101F06               = OpShiftLeftLogical %u32_t %_003A8A5E %_3F37A0F2 
+    %_596C7D30          = OpIAdd %u32_t %_46101F06 %_003A861D            
+    %_96E6B352                   = OpShiftLeftLogical %u32_t %_003D4843 %_0000073E         
+    %_53D6FBE1              = OpIAdd %u32_t %_96E6B352 %_003D4402                
+    
+    %_6B289F78             = OpAccessChain %pt_f16_t %_D6617CB2 %_596C7D30
+    %_2E8E54D2              = OpLoad %f16_t %_6B289F78 Aligned 2
+    %_C50BF1FC          = OpFConvert %f32_t %_2E8E54D2
+    %_7113FE18       = OpFMul %f32_t %_C50BF1FC %_EBFE7DBA
+    OpBranch %_B95BF986
+
+    %_B95BF986 = OpLabel
+    %_1B477EE5                  = OpPhi %f32_t %_7113FE18 %_0001D80A %_380F1144 %_B9597FB1
+    %_0001CB47                         = OpPhi %i32_t %_A39B1870 %_0001D80A %_F838D159 %_B9597FB1
+    %_078DCC73                     = OpSLessThan %bool %_0001CB47 %_00000699
+    OpLoopMerge %_B95AA977 %_B9597FB1 Unroll
+    OpBranchConditional %_078DCC73 %_B95AA977 %_B958AF40
+
+    %_B958AF40 = OpLabel
+    
+    %_0481FFF6                    = OpIAdd %u32_t %_003D4402 %_0001CB47
+    %_04941877                    = OpIAdd %u32_t %_003D4843 %_0001CB47
+    %_720E07C9      = OpIAdd %u32_t %_46101F06 %_0481FFF6
+    %_4C89D290         = OpShiftLeftLogical %u32_t %_04941877 %_3F37A0F2
+    %_5BB8FC7A    = OpIAdd %u32_t %_4C89D290 %_003A861D
+    
+    %_B67030EF         = OpAccessChain %pt_f16_t %_D63D4BB0 %_720E07C9
+    %_EA18A4C9          = OpLoad %f16_t %_B67030EF Aligned 2
+    %_10079AE0      = OpAccessChain %wg_f16_t %_D42A1FB2 %_53D6FBE1
+                                OpStore %_10079AE0 %_EA18A4C9
+    
+    %_09E12530         = OpAccessChain %pt_f16_t %_D64F6431 %_5BB8FC7A
+    %_3D89990A          = OpLoad %f16_t %_09E12530 Aligned 2
+    %_1C3CC0C1      = OpAccessChain %wg_f16_t %_C06BF493 %_53D6FBE1
+                                OpStore %_1C3CC0C1 %_3D89990A
+                                OpControlBarrier %_4F6504F0 %_4F6504F0 %_07E2BAD8
+    OpBranch %_B9597FB1
+
+    %_B9597FB1 = OpLabel
+    
+    %_380F1144              = OpFunctionCall %f32_t %_0EF3526B %_1B477EE5 %_003D4402 %_96E6B352
+                                OpControlBarrier %_4F6504F0 %_4F6504F0 %_07E2BAD8
+    %_F838D159                    = OpISub %i32_t %_0001CB47 %_0000DFCE
+    OpBranch %_B95BF986
+
+    %_B95AA977 = OpLabel
+    %_5FA0E5D1              = OpFConvert %f16_t %_1B477EE5
+    %_F08554B9             = OpAccessChain %pt_f16_t %_D6739533 %_596C7D30
+                                OpStore %_F08554B9 %_5FA0E5D1 Aligned 2
+    OpReturn
+
+OpFunctionEnd
