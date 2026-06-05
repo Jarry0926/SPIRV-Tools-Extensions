@@ -15,11 +15,7 @@
 					}
 #define STRING_INIT(VAR) VAR.it = VAR.str
 
-// InFnScope: bool indicates whether or not the current processing is between OpFunction and OpFunctionEnd
-// FnCnt: number of function scope encountered so far, 0 for the first one
-static int      InFnScope;
-static uint32_t FnCnt;
-static int      PostAnnotation;
+static uint32_t g_status;
 
 STRING(1e6);
 STRING(1e4);
@@ -42,9 +38,7 @@ static struct StrMap varNames;
 static inline void
 alnumInit()
 {
-    InFnScope      = 0;
-    FnCnt          = 0u;
-	PostAnnotation = 0;
+	g_status = 0u;
 	STRING_INIT(g_out);
 	STRING_INIT(g_word);
 	STRING_INIT(g_varNames);
@@ -56,11 +50,11 @@ alnumInit()
 static inline char*
 alnumParseSSA(char* p_lineIt)
 {
-    char           stripped[64]; // SSA id with white spaces removed
-    char*          ret = strStrip(p_lineIt + 1, stripped, '`');
-	const uint32_t val = strmapHash(stripped);
+    alignas(64) char stripped[64]; // SSA id with white spaces removed
+    char*            ret   = strStrip(p_lineIt + 1, stripped, '`');
+	const uint32_t   hashv = strmapHash(stripped);
 	if (!strmapFind(&globalVar, stripped, val)) {
-		if (InFnScope) {
+		if (g_status & STATUS_IN_FN_BIT) {
 			// Append '_' FnCnt times to each string of local variable
 			char* it = &stripped[strlen(stripped)];
 			for (uint32_t i = 0u; i < FnCnt; ++i) {

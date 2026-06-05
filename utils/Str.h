@@ -17,8 +17,8 @@ strFromHex64(uint64_t p_in,
 		     char*    p_pOut);
 
 /**
- * @brief Strip white spaces from `*p_ppIn` until `p_end` delimiter,
- *        producing `p_pOut`, advancing `*p_ppIn` to the last char scanned
+ * @brief Strip white spaces from `*p_ppIn` before `p_end` delimiter,
+ *        producing `p_pOut` and advancing `*p_ppIn` pass `p_end`
  *
  * @param p_ppIn: pointer to string to be stripped
  * @param p_pOut: string after being stripped

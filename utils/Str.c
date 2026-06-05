@@ -31,6 +31,7 @@ strStrip(char const** const p_pIn,
 			++p_pOut;
 		}
 	}
+	*p_pIn = pIt + 1;
 	return p_pOut;
 }
 
