@@ -1,0 +1,5 @@
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Alnum")
+
