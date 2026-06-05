@@ -22,7 +22,7 @@ strFromHex64(uint64_t p_in,
  *
  * @param p_ppIn: pointer to string to be stripped
  * @param p_pOut: string after being stripped
- * @param p_end: end delimiter of `p_pIn`
+ * @param p_end: ending delimiter of `p_pIn`
  *
  * @return pointer pass the end of `p_pOut`
  */
@@ -37,7 +37,7 @@ strStrip(char const** const p_ppIn,
  *
  * @param p_pIn: string to be stripped
  * @param p_pOut: string after being stripped
- * @param p_len: number of chars in `p_pIn` to be stripped
+ * @param p_len: number of chars in `p_pIn`, excluding null terminator
  *
  * @return pointer pass the end of `p_pOut`
  */
@@ -46,10 +46,29 @@ strStripN(char const* const p_pIn,
 		  char*             p_pOut,
 		  const uint32_t    p_len);
 
+
+/**
+ * @brief Check whether or not two strings `p_pSrc` and `p_pDst` are the same
+ *
+ * @param p_pSrc: source string to be compared, must be 64-byte aligned
+ * @param p_pDst: destination string to be compared, must be 64-byte aligned
+ *
+ * @return 1 if they are the same,
+ *         0 otherwise
+ */
 int
 str512Match(char const* p_pSrc,
 	        char const* p_pDst);
 
+/**
+ * @breif Check whether or not a pattern `p_pPat` occurs in string `p_pStr`
+ *
+ * @param p_pPat: patter to be checked, must be 64-byte aligned
+ * @param p_pStr: string to be checked, must be 64-byte aligned
+ *
+ * @return index into `p_pStr` where the pattern occurs,
+ *         0 if the pattern does not occur
+ */
 int
 str512SubMatch(char const*    p_pPat,
 		       char const*    p_pStr,
